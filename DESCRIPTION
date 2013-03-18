@@ -1,0 +1,15 @@
+Title: Sample size for RNAseq studies
+Package: RNASeqPower
+Version: 0.99.1
+LazyLoad: Yes
+Authors@R: c(person(c("Terry", "M"), "Therneau", 
+                    email="therneau.terry@mayo.edu",
+	            role=c("aut", "cre")),
+             person("Hart", "Stephen", role=c("ctb")))
+Description: RNA-seq, sample size
+License: LGPL (>=2)
+bioCviews: software, RNASeq, Bioinformatics, DifferentialExpression
+Packaged: 2013-03-14 19:10:21 UTC; therneau
+Author: Terry M Therneau [aut, cre],
+  Hart Stephen [ctb]
+Maintainer: Terry M Therneau <therneau.terry@mayo.edu>
