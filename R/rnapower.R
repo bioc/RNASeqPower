@@ -33,7 +33,7 @@ rnapower <- function(depth, n, n2=n, cv, cv2=cv, effect, alpha, power) {
         }
     }
     
-    else if (missing(cv1)) { # solve for the cv (odd choice)
+    else if (missing(cv)) { # solve for the cv (odd choice)
         out <- array(0., dim=c(length(depth), length(n1), length(effect),
                                length(alpha), length(power)))
         dimnames(out) <- list(depth, n1, effect, alpha, power)
@@ -46,6 +46,7 @@ rnapower <- function(depth, n, n2=n, cv, cv2=cv, effect, alpha, power) {
                 }
             }
         }
+        out <- sqrt(out)
     }
 
     else if (missing(effect)) { # solve for the effect size
@@ -56,8 +57,9 @@ rnapower <- function(depth, n, n2=n, cv, cv2=cv, effect, alpha, power) {
          for (i1 in seq(along=depth)) {
             for (i2 in seq(along=n1)) {
                 for (i3 in seq(along=cv1)) {
-                    out[i1, i2,i3,,] <- temp * (1/n1[i2] + 1/n2[i2]) * 
-                        (2/depth[i1] + cv1[i3]^2 + cv2[i3]^2)
+                    var1 <- (1/depth[i1] + cv1[i3]^2)/n1[i2]
+                    var2 <- (1/depth[i1] + cv2[i3]^2)/n2[i2]
+                    out[i1, i2,i3,,] <- temp * sqrt(var1 + var2) 
                 }
             }
         }

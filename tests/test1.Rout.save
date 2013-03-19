@@ -1,0 +1,76 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(RNASeqPower)
+> 
+> # Error message: "missing depth"
+> #rnapower(n=10, cv=.1, effect=2, alpha=.05, power=.9)
+> 
+> rnapower(10, cv=.5, effect=c(1.5, 1.75, 2), alpha=.05, power=c(.8, .9))
+          0.8      0.9
+1.5  33.41941 44.73910
+1.75 17.54389 23.48629
+2    11.43549 15.30888
+> rnapower(10, n=20 , effect=c(1.5, 1.75, 2), alpha=.05, power=c(.8, .9))
+           0.8       0.9
+1.5  0.3308461 0.2376188
+1.75 0.5468084 0.4450239
+2    0.7156322 0.5977048
+> rnapower(10, n= c(10,20), cv=.5, alpha=.05, power=c(.8, .9))
+        0.8      0.9
+10 2.098515 2.357553
+20 1.688986 1.833876
+> rnapower(10, n= c(10,20), cv=.5, effect=1.5, power=c(.8, .9))
+         0.8       0.9
+10 0.4896329 0.8018431
+20 0.1849454 0.3757519
+> rnapower(10, n= c(10,20), cv=.5, effect=c(1.5,2), alpha=.05)
+         1.5         2
+10 0.3345258 0.7453365
+20 0.5821271 0.9595131
+> 
+> 
+> # More formal tests: cv and n
+> t1 <- rnapower(15, n=20, effect=1.5, alpha=.05, power=.8)
+> t2 <- rnapower(15,  effect=1.5, alpha=.05, power=.8, cv=t1)
+> all.equal(t2, 20)
+[1] TRUE
+> 
+> 
+> # effect and n
+> t3 <- rnapower(15, n=20, cv=.5, alpha=.05, power=.8)
+> t4 <- rnapower(15, cv=.5, alpha=.05, power=.8, effect=t3)
+> all.equal(t4, 20)
+[1] TRUE
+> 
+> # power and n
+> t5 <- rnapower(15, n=20, effect=1.5, cv=.5, alpha=.05)
+> t6 <- rnapower(15, effect=1.5, cv=.5, alpha=.05, power=t5)
+> all.equal(t6, 20)
+[1] TRUE
+> 
+> # alpha and n
+> t7 <- rnapower(15, n=20, effect=1.5, cv=.5, power=.8)
+> t8 <- rnapower(15, effect=1.5, cv=.5, power=.8, alpha=t7)
+> all.equal(t8, 20)
+[1] TRUE
+> 
+> 
+> proc.time()
+   user  system elapsed 
+  0.220   0.051   0.297 
