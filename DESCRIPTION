@@ -1,6 +1,6 @@
 Title: Sample size for RNAseq studies
 Package: RNASeqPower
-Version: 0.99.2
+Version: 1.0.0
 LazyLoad: Yes
 Authors@R: c(person(c("Terry", "M"), "Therneau", 
                     email="therneau.terry@mayo.edu",
