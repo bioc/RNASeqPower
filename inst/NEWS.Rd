@@ -1,5 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the RNASeqPower package}
+\section{Changes in version 1.0.1}{
+\itemize{
+  \item Add a citation to the manual page, add CITATION file
+  }}
+
 \section{Changes in version 0.99-2}{
   \itemize{
     \item Add the tests directory

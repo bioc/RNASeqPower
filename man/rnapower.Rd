@@ -56,7 +56,13 @@ rnapower(depth, n, n2 = n, cv, cv2 = cv, effect, alpha, power)
   with all the arguments except \code{n} supplied then the result will
   be the needed samples size; if it were run with all arguments except
   \code{power} the result will contain power estimates, etc.}
-\author{Terry Therneau}
+\author{Terry Therneau and Steven Hart}
+\references{
+  Steven Hart, Terry Therneau, Yuji Zhang, Gregory Poland, and
+  Jean-Pierre Kocher.
+  Calculating sample size estimates for RNA sequencing data.
+  J. Comp. Biology, 2013, in press.
+}  
 \examples{
 # What would the power be for a study with 12 per group, to detect a
 #  2-fold change, given deep (50x) coverage?

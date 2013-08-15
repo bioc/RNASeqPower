@@ -1,0 +1,213 @@
+\documentclass{article}
+\usepackage[pdftex]{graphicx}
+\usepackage{amsmath}
+\usepackage{Sweave}
+\addtolength{\textwidth}{1in}
+\addtolength{\oddsidemargin}{-.5in}
+\setlength{\evensidemargin}{\oddsidemargin}
+
+\DefineVerbatimEnvironment{Sinput}{Verbatim} {xleftmargin=2em}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{xleftmargin=2em}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{xleftmargin=2em}
+\fvset{listparameters={\setlength{\topsep}{0pt}}}
+%\renewenvironment{Schunk}{\vspace{\topsep}}{\vspace{\topsep}}
+
+%\VignetteIndexEntry{RNAseq samplesize}
+%\VignetteDepends{RNASeqPower}
+\SweaveOpts{keep.source=TRUE}
+\title{Sample Size for RNA-Seq and similar Studies}
+\author{Steven Hart \and Terry Therneau}
+
+\begin{document}
+  \maketitle
+
+<<premable, echo=FALSE>>=
+options(width=60, continue=" ")
+options(SweaveHooks=list(fig=function() par(mar=c(5.1, 4.1, .3, 1.1))))
+latex.list <- function(mat, digits=2, label= TRUE, ...) {
+    dname <- dimnames(mat)
+    if (length(dname[[2]]) & label) 
+        cat('&', paste(dname[[2]], collapse=' &'), '\\\\\n')
+    
+    temp <- format(mat, digits=digits, trim=TRUE, ...)
+    temp <- ifelse(temp=='NA', ' ', temp)
+    rname <- dname[[1]]
+    for (i in 1:nrow(mat)) {
+        if (length(rname) && label)
+            cat(rname[i,], ' & ', paste(temp[i], collapse=' & '), '\\\\\n')
+	else  cat(paste(temp[i,], collapse=' & '), '\\\\\n')
+	}
+    invisible(NULL)
+    }
+@ 
+
+\section{Framing the problem}
+Sample size computations for an experiment that involves high throughput
+sequencing consist of a number of separate steps. 
+The first, and most important, is to ask ``what is the scientific question''.
+This drives the entire process, and answers to the later steps cannot be
+addressed satisfactorily out of the context.
+
+Here is a particular chain as illustration.
+\begin{enumerate}
+  \item What is the scientific question?
+    \begin{itemize}
+      \item At what sites do a set of tumor and normal samples differ
+	in RNA expression?
+    \end{itemize}
+  \item How many samples will be needed?
+    \begin{itemize}
+      \item Define an ``important'' difference.
+	\begin{itemize}
+	  \item Any site where the relative expression differs by 2 fold and
+	    is of a worthwhile amount (we don't want 2 transcripts vs 5
+              to be noticed).   %'
+	  \item At least 85\% power at $\alpha=.01$ for any given site.
+	\end{itemize}
+      \item How much difference is there within group?
+    \end{itemize}
+  \item What is the trade off between coverage and biological samples?
+    \begin{itemize}
+    \item A new biological sample = 3 sequencing runs 
+      (opportunity cost + time + dollars)
+      \end{itemize}
+  \item What depth of sequencing coverage will be required?
+    \begin{itemize}
+      \item What is the pattern of coverage? 
+      \item What fraction of sites can be lost due to uneven coverage?
+	\begin{itemize}
+	  \item 20\%
+	\end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+Perhaps the hardest question concerns heterogeneity within a group, which
+can change by an order of magnitude as we go from cell lines to
+inbred animals to human subjects.
+If the true  expression at a particular site varies by $\pm 30\%$
+between control subjects, then using deep sequencing to measure the 
+value for each individual subject to within $\pm .01\%$ is clearly
+a waste of resources.
+(Is a milligram scale necessary in a weight loss study?)
+
+
+\section{Usage}
+A formal sample size calculation for comparison of two groups
+will  involve five factors, each of which is an argument to the
+rnapower function.
+\begin{itemize}
+  \item The depth of sequencing and consequent expected count $\mu$ for
+    a given transcript, argument \texttt{depth}.
+  \item The coefficient of variation of counts within each of the two
+    groups, argument \texttt{cv}.
+  \item The relative expression that we wish to detect $\Delta$,
+    argument \texttt{effect}.
+  \item The target false positive rate $\alpha$ and false negative
+    rate $\beta$ desired (or power = $1-\beta$),
+    arguments \texttt{alpha} and \texttt{power}.
+  \item The number of samples $n$ in each group, argument \texttt{n}
+\end{itemize}
+
+Here is an example where we assume an average depth of coverage of 20,
+equal within group coefficient of variation of .4, and a range of effect sizes.
+The result is the number of subjects per group that are required.
+When only 1 CV value is given the program assumes the same value for
+both groups.
+<<>>=
+library(RNASeqPower)
+rnapower(depth=20, cv=.4, effect=c(1.25, 1.5, 1.75, 2), 
+        alpha= .05, power=c(.8, .9))
+@ 
+The resulting table has one row for each of the four effect sizes and
+one column for each power value.  
+It requires a large sample size to detect a 25\% increase with high power 
+(89 per group), but the sizes fall off rapidly as the true biologic impact
+grows larger.  
+The following calls vary the depth of sequencing and the CV.
+<<>>=
+rnapower(depth=100, cv=.4, effect=c(1.25, 1.5, 1.75, 2), 
+        alpha= .05, power=c(.8, .9))         
+
+rnapower(depth=1000, cv=.4, effect=c(1.25, 1.5, 1.75, 2), 
+        alpha= .05, power=c(.8, .9))         
+
+rnapower(depth=20, cv=.3, effect=c(1.25, 1.5, 1.75, 2), 
+        alpha= .05, power=c(.8, .9))         
+@ 
+Increasing the depth to 100 gives some decrease in sample size, but a
+further increase to 1000 results in only minor further gain.
+Reduction in the within-group CV has a more substantial effect.
+We have found that in most cases the between subject variability
+and not assay variation is the major component of error.
+
+When calling the function any one of parameters
+except the depth of sequencing can be omitted, the function will then solve
+for that parameter.  
+So for instance to compute the power of a run with a known sample
+size we could use
+<<>>=
+rnapower(depth=8, n=10, cv=0.1, effect=c(1.5, 1.75, 2),
+         alpha=.05)
+@ 
+
+The function has two other optional arguments \texttt{n2} and \texttt{cv2},
+which allow calculations for the case that the sample size or coefficient
+of variation differs between the two groups.
+The default is to assume that they are the same.
+
+Values for the statistical parameters are traditionally set to $\alpha$=.05 and
+power of .8 or .9.   
+As a guide for depth and CV Hart et al \cite{Hart2012} found
+that over a range of experiments 85\%--95\% of targets had coverage of
+.1 per million mapped, i.e. that a total depth of 40 million would
+give a coverage of $\ge 4$ for the majority of targets.   
+They also found an average within group CV of $\le 0.4$ for 90\%
+of the genes in a range of human studies, 
+with a lower CV of 0.1 for inbred animals.
+There will always be a few transcripts with either very low coverage or
+high within-group variation and for these sample sizes and/or depth would
+need to be very large.  
+Power calculations would normally be targeted to the majority of targets
+that are better behaved.
+
+
+\section{Derivation}
+The set of counts $y_{ij}$ for a particular transcript $i$ 
+and a set of subjects $j$ often closely follows a negative
+binomial distribution with variance
+\begin{align}
+    {\rm var}(y_{ij}) & =\mu_i + (\mu_i \psi)^2 \label{eq:negbinom} \\
+    {\rm var}\log(y_i) &\approx 1/\mu_i + \psi^2 \label{eq:logneg}
+\end{align}
+where $\mu_i$ is the average expected count at that locus and
+$\psi$ is the expected coefficient of variation between subjects.
+The first term in the variance represents simple Poisson counting variation
+in the sequencer, the second is due to variation from subject to subject
+within the group.  The value $\mu_i$ is the expected count for the
+feature, $E(y_i) = \mu_i$. 
+For most studies the final analysis will 
+focus on relative changes in the counts,
+e.g., ``group 2 has a 55\% greater expression of gene z than group 1'',
+which is equivalent to a difference on log scale.  
+Thus equation \eqref{eq:logneg} is the more appropriate one, and
+we see that the error for any given sample is proportional to the
+subject to subject variation plus approximately $1/\mu$ variation due
+to sequencing.
+
+Hart et al \cite{Hart2012} carry these derivations through formally
+in terms of a score test and give illustrative examples of coverage
+and within-group variation for several studies.  
+The \texttt{rnapower} function is based on their resultant formula:
+\begin{equation*}
+  (z_\alpha + z_\beta)^2 = 
+      \frac{\Delta^2}{(1/\mu + \psi_1^2)/n_1 + (1/\mu + \psi^2_2)/n_2}
+\end{equation*}
+
+\begin{thebibliography}{9}
+  \bibitem{Hart2012} Steven N Hart, Terry M Therneau, Yuji Zhang 
+    and Jean-Pierre Kocher,
+  \emph{Calculating Sample Size Estimates for RNA Sequencing Data},
+  submitted.
+\end{thebibliography}
+
+\end{document}

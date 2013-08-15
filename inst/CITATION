@@ -1,0 +1,17 @@
+citHeader("To cite package 'RNASeqPower' in publications use:")
+     
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("R package version", meta$Version)
+
+citEntry(entry = "Manual",
+         title = "Calculating samplesSize estimates for RNA Seq studies",
+         author = personList(as.person("Terry Therneau"),
+                             as.person("Steven Hart"),
+                             as.person("Jean-Pierre Kocher")),
+         year = year,
+         note = vers,
+         textVersion =
+         paste0("Terry Therneau, Steven Hart and Jean-Pierre Kocher (",
+                year,
+                "). Calculating samplesSize estimates for RNA Seq studies. ",
+                vers, "."))
