@@ -1,6 +1,6 @@
 Title: Sample size for RNAseq studies
 Package: RNASeqPower
-Version: 1.22.0
+Version: 1.22.1
 LazyLoad: Yes
 Authors@R: c(person(c("Terry", "M"), "Therneau",
         email="therneau.terry@mayo.edu", role=c("aut", "cre")),
@@ -9,4 +9,4 @@ Description: RNA-seq, sample size
 License: LGPL (>=2)
 bioCviews: software, RNASeq, Bioinformatics, DifferentialExpression
 Maintainer: Terry M Therneau <therneau.terry@mayo.edu>
-biocViews: RNASeq
+biocViews: ImmunoOncology, RNASeq
